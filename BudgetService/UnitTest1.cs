@@ -44,8 +44,21 @@ public class Tests
     }
 
     [Test]
-    public void temp()
+    public void Query_oneDay()
     {
+        _budgetRepo!.GetAll().Returns(new List<Budget>
+        {
+            new()
+            {
+                YearMonth = "202311",
+                Amount = 30
+            }
+        }); 
+        var budgetService = new BudgetService(_budgetRepo);
+
+        var budget = budgetService.Query(new DateTime(2023, 11, 1), new DateTime(2023, 11, 1));
+
+        budget.Should().Be(1); 
     }
 }
 
@@ -64,6 +77,13 @@ public class BudgetService
 {
     private readonly IBudgetRepo _budgetRepo;
 
+    private readonly Dictionary<int, int> _monthdays = new Dictionary<int, int>()
+    {
+        {
+            11,30
+        }
+    };
+
     public BudgetService(IBudgetRepo budgetRepo)
     {
         _budgetRepo = budgetRepo;
@@ -73,10 +93,15 @@ public class BudgetService
     {
         var budgets = _budgetRepo.GetAll();
 
+        var interval = endTime - startTime;
         return budgets.Where(budget =>
         {
             var dateTime = DateTime.ParseExact(budget.YearMonth, new[] { "yyyyMM" }, CultureInfo.CurrentCulture);
             return dateTime >= startTime && dateTime <= endTime;
-        }).Sum(budget => budget.Amount);
+        }).Sum(budget =>
+        {
+            var intervalDays = interval.Days+1;
+            return budget.Amount / _monthdays[startTime.Month] * intervalDays;
+        });
     }
 }
