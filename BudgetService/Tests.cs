@@ -100,4 +100,27 @@ public class Tests
 
         budget.Should().Be(4);
     }
+
+    [Test]
+    public void Query_Corss_Years()
+    {
+        _budgetRepo!.GetAll().Returns(new List<Budget>
+        {
+            new()
+            {
+                YearMonth = "202312",
+                Amount = 31
+            },
+            new()
+            {
+                YearMonth = "202401",
+                Amount = 62
+            }
+        });
+        var budgetService = new BudgetService(_budgetRepo);
+
+        var budget = budgetService.Query(new DateTime(2023, 12, 29), new DateTime(2024, 01, 31));
+
+        budget.Should().Be(65);
+    }
 }

@@ -4,13 +4,20 @@ namespace BudgetService.Training;
 
 public class BudgetService
 {
-    private readonly Dictionary<int, int> _monthdays = new()
+    private readonly Dictionary<int, int> _monthDaysDictionary = new()
     {
-        {
-            11, 30
-        },
-        { 10, 31 },
-        { 9, 30 }
+        {1, 31},
+        {2, 28},
+        {3, 31},
+        {4, 30},
+        {5, 31},
+        {6, 30},
+        {7, 31},
+        {8, 31},
+        {9, 30},
+        {10, 31},
+        {11, 30},
+        {12, 31}
     };
 
     private readonly IBudgetRepo _budgetRepo;
@@ -34,22 +41,28 @@ public class BudgetService
             return yearMonth >= startYearMonth && yearMonth <= endTImeYearMonth;
         }).Sum(budget =>
         {
-            var intervalDays = interval.Days + 1;
             var dateTime = DateTime.ParseExact(budget.YearMonth, new[] { "yyyyMM" }, CultureInfo.CurrentCulture);
-            if (dateTime.Month == endTime.Month)
-            {
-                intervalDays = endTime.Day;
-            }
-            else if (dateTime.Month == startTime.Month)
-            {
-                intervalDays = _monthdays[startTime.Month] - startTime.Day + 1;
-            }
-            else
-            {
-                intervalDays = _monthdays[dateTime.Month];
-            }
 
-            return budget.Amount / _monthdays[dateTime.Month] * intervalDays;
+            return budget.Amount / _monthDaysDictionary[dateTime.Month] * DecideIntervalDays(startTime, endTime, interval, dateTime);
         });
+    }
+
+    private int DecideIntervalDays(DateTime startTime, DateTime endTime, TimeSpan interval, DateTime dateTime)
+    {
+        var intervalDays = interval.Days + 1;
+        if (dateTime.Month == endTime.Month)
+        {
+            intervalDays = endTime.Day;
+        }
+        else if (dateTime.Month == startTime.Month)
+        {
+            intervalDays = _monthDaysDictionary[startTime.Month] - startTime.Day + 1;
+        }
+        else
+        {
+            intervalDays = _monthDaysDictionary[dateTime.Month];
+        }
+
+        return intervalDays;
     }
 }
