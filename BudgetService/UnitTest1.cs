@@ -1,3 +1,4 @@
+using System.Globalization;
 using FluentAssertions;
 using NSubstitute;
 
@@ -27,6 +28,11 @@ public class Tests
             {
                 YearMonth = "202311",
                 Amount = 30
+            },
+            new()
+            {
+                YearMonth = "202310",
+                Amount = 31
             }
         });
 
@@ -35,6 +41,11 @@ public class Tests
         var budget = budgetService.Query(new DateTime(2023, 11, 1), new DateTime(2023, 11, 30));
 
         budget.Should().Be(30);
+    }
+
+    [Test]
+    public void temp()
+    {
     }
 }
 
@@ -62,6 +73,10 @@ public class BudgetService
     {
         var budgets = _budgetRepo.GetAll();
 
-        return budgets.Sum(budget => budget.Amount);
+        return budgets.Where(budget =>
+        {
+            var dateTime = DateTime.ParseExact(budget.YearMonth, new[] { "yyyyMM" }, CultureInfo.CurrentCulture);
+            return dateTime >= startTime && dateTime <= endTime;
+        }).Sum(budget => budget.Amount);
     }
 }
