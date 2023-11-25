@@ -53,12 +53,30 @@ public class Tests
                 YearMonth = "202311",
                 Amount = 30
             }
-        }); 
+        });
         var budgetService = new BudgetService(_budgetRepo);
 
         var budget = budgetService.Query(new DateTime(2023, 11, 1), new DateTime(2023, 11, 1));
 
-        budget.Should().Be(1); 
+        budget.Should().Be(1);
+    }
+
+    [Test]
+    public void Query_notfoundBudget()
+    {
+        _budgetRepo!.GetAll().Returns(new List<Budget>
+        {
+            new()
+            {
+                YearMonth = "202311",
+                Amount = 30
+            }
+        });
+        var budgetService = new BudgetService(_budgetRepo);
+
+        var budget = budgetService.Query(new DateTime(2023, 10, 1), new DateTime(2023, 10, 31));
+
+        budget.Should().Be(0);
     }
 }
 
@@ -80,7 +98,7 @@ public class BudgetService
     private readonly Dictionary<int, int> _monthdays = new Dictionary<int, int>()
     {
         {
-            11,30
+            11, 30
         }
     };
 
@@ -100,7 +118,7 @@ public class BudgetService
             return dateTime >= startTime && dateTime <= endTime;
         }).Sum(budget =>
         {
-            var intervalDays = interval.Days+1;
+            var intervalDays = interval.Days + 1;
             return budget.Amount / _monthdays[startTime.Month] * intervalDays;
         });
     }
