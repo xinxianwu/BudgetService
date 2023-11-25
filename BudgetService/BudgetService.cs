@@ -6,18 +6,18 @@ public class BudgetService
 {
     private readonly Dictionary<int, int> _monthDaysDictionary = new()
     {
-        {1, 31},
-        {2, 28},
-        {3, 31},
-        {4, 30},
-        {5, 31},
-        {6, 30},
-        {7, 31},
-        {8, 31},
-        {9, 30},
-        {10, 31},
-        {11, 30},
-        {12, 31}
+        { 1, 31 },
+        { 2, 28 },
+        { 3, 31 },
+        { 4, 30 },
+        { 5, 31 },
+        { 6, 30 },
+        { 7, 31 },
+        { 8, 31 },
+        { 9, 30 },
+        { 10, 31 },
+        { 11, 30 },
+        { 12, 31 }
     };
 
     private readonly IBudgetRepo _budgetRepo;
@@ -43,7 +43,7 @@ public class BudgetService
         {
             var dateTime = DateTime.ParseExact(budget.YearMonth, new[] { "yyyyMM" }, CultureInfo.CurrentCulture);
 
-            return budget.Amount / _monthDaysDictionary[dateTime.Month] * DecideIntervalDays(startTime, endTime, interval, dateTime);
+            return (decimal)budget.Amount / DateTime.DaysInMonth(dateTime.Year, dateTime.Month) * DecideIntervalDays(startTime, endTime, interval, dateTime);
         });
     }
 
@@ -56,11 +56,11 @@ public class BudgetService
         }
         else if (dateTime.Month == startTime.Month)
         {
-            intervalDays = _monthDaysDictionary[startTime.Month] - startTime.Day + 1;
+            intervalDays = DateTime.DaysInMonth(dateTime.Year, dateTime.Month) - startTime.Day + 1;
         }
         else
         {
-            intervalDays = _monthDaysDictionary[dateTime.Month];
+            intervalDays = DateTime.DaysInMonth(dateTime.Year, dateTime.Month);
         }
 
         return intervalDays;
